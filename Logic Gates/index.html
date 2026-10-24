@@ -1,0 +1,189 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Interactive Logic Gates Explorer</title>
+
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        background-color: #222;
+        color: #fff;
+        font-family: Arial, Helvetica, sans-serif;
+      }
+
+      main {
+        height: 100vh;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+      }
+
+      .board {
+        display: flex;
+        flex-direction: column;
+      }
+
+      .input {
+        display: flex;
+        width: 100%;
+        border: 2px solid white;
+        border-bottom: 0;
+        padding: 12px;
+        font-size: 24px;
+      }
+
+      .input .one,
+      .input .two {
+        width: 100%;
+        display: flex;
+        gap: 8px;
+        flex-direction: column;
+      }
+
+      .input label {
+        font-size: 20px;
+      }
+
+      .input .bits {
+        display: flex;
+        gap: 16px;
+      }
+
+      .output {
+        display: grid;
+        grid-template-columns: repeat(2, 300px);
+      }
+
+      .gate {
+        display: flex;
+        gap: 32px;
+        align-items: center;
+        justify-content: space-around;
+        padding: 24px;
+        border: 2px solid white;
+      }
+
+      .gate img {
+        width: 64px;
+      }
+
+      .gate span {
+        font-size: 18px;
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <h1>Interactive Logic Gates Explorer</h1>
+      <br />
+
+      <div class="board">
+        <div class="input">
+          <div class="one">
+            <span>Input A:</span>
+            <div class="bits">
+              <label for="A-bit-0">
+                <input type="radio" id="A-bit-0" name="input-bit-A" value="0" />
+                0 (OFF)
+              </label>
+
+              <label for="A-bit-1">
+                <input type="radio" id="A-bit-1" name="input-bit-A" value="1" />
+                1 (ON)
+              </label>
+            </div>
+          </div>
+
+          <div class="two">
+            <span>Input B:</span>
+            <div class="bits">
+              <label for="B-bit-0">
+                <input type="radio" id="B-bit-0" name="input-bit-B" value="0" />
+                0 (OFF)
+              </label>
+
+              <label for="B-bit-1">
+                <input type="radio" id="B-bit-1" name="input-bit-B" value="1" />
+                1 (ON)
+              </label>
+            </div>
+          </div>
+        </div>
+
+        <div class="output">
+          <div class="gate">
+            <div class="info">
+              <h2>AND</h2>
+              <span>A = 1, B = 1</span>
+            </div>
+            <img src="./assets/bulb_off.svg" alt="" />
+          </div>
+
+          <div class="gate">
+            <div class="info">
+              <h2>OR</h2>
+              <span>A = 1, B = 1</span>
+            </div>
+            <img src="./assets/bulb_off.svg" alt="" />
+          </div>
+
+          <div class="gate">
+            <div class="info">
+              <h2>NOT A</h2>
+              <span>A = 1</span>
+            </div>
+            <img src="./assets/bulb_off.svg" alt="" />
+          </div>
+
+          <div class="gate">
+            <div class="info">
+              <h2>NOT B</h2>
+              <span>A = 1</span>
+            </div>
+            <img src="./assets/bulb_off.svg" alt="" />
+          </div>
+
+          <div class="gate">
+            <div class="info">
+              <h2>NAND</h2>
+              <span>A = 1, B = 1</span>
+            </div>
+            <img src="./assets/bulb_off.svg" alt="" />
+          </div>
+
+          <div class="gate">
+            <div class="info">
+              <h2>NOR</h2>
+              <span>A = 1, B = 1</span>
+            </div>
+            <img src="./assets/bulb_off.svg" alt="" />
+          </div>
+
+          <div class="gate">
+            <div class="info">
+              <h2>XOR</h2>
+              <span>A = 1, B = 1</span>
+            </div>
+            <img src="./assets/bulb_off.svg" alt="" />
+          </div>
+
+          <div class="gate">
+            <div class="info">
+              <h2>XNOR</h2>
+              <span>A = 1, B = 1</span>
+            </div>
+            <img src="./assets/bulb_off.svg" alt="" />
+          </div>
+        </div>
+      </div>
+    </main>
+  </body>
+</html>
