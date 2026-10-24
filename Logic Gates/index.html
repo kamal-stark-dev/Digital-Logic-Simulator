@@ -151,7 +151,7 @@
           <div class="gate">
             <div class="info">
               <h2>NOT A</h2>
-              <span>A = 1</span>
+              <span id="not-a-span">A = 1</span>
             </div>
             <img id="not-a-gate-bulb" src="./assets/bulb_off.svg" alt="" />
           </div>
@@ -159,7 +159,7 @@
           <div class="gate">
             <div class="info">
               <h2>NOT B</h2>
-              <span>A = 1</span>
+              <span id="not-b-span">B = 1</span>
             </div>
             <img id="not-b-gate-bulb" src="./assets/bulb_off.svg" alt="" />
           </div>
@@ -210,8 +210,18 @@
         bulb.src = turnOn ? bulbOnPath : bulbOffPath;
       }
 
+      function updateInfo() {
+        document.querySelectorAll(".gate .info span").forEach((gate) => {
+          gate.innerText = `A = ${input_bit_A}, B = ${input_bit_B}`;
+        });
+
+        document.getElementById("not-a-span").innerText = `A = ${input_bit_A}`;
+        document.getElementById("not-b-span").innerText = `B = ${input_bit_B}`;
+      }
+
       function updateGates() {
-        // TODO: update info of each gate -> ex: A = 0, B = 1
+        // update info of each gate -> ex: A = 0, B = 1
+        updateInfo();
 
         // turn on/off bulbs accordingly
 
