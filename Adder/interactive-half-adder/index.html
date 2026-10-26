@@ -1,0 +1,300 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Interactive Half Adder</title>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <main class="app">
+      <header class="topbar">
+        <div class="brand-mark">∑</div>
+        <div>
+          <p class="eyebrow">DIGITAL LOGIC LAB</p>
+          <h1>Half Adder</h1>
+        </div>
+        <span class="status"
+          ><span class="status-dot"></span> LIVE SIMULATION</span
+        >
+      </header>
+
+      <section class="intro">
+        <div>
+          <h2>Two bits in. Two outputs out.</h2>
+          <p>
+            Toggle the inputs and watch the signals travel through the XOR and
+            AND gates.
+          </p>
+        </div>
+        <button id="resetBtn" class="reset-btn" type="button">↺ Reset</button>
+      </section>
+
+      <section class="circuit-card">
+        <div class="card-heading">
+          <div>
+            <p class="eyebrow">CIRCUIT VIEW</p>
+            <h3>Logic gate connections</h3>
+          </div>
+          <span class="tiny-pill"
+            ><span class="pulse-dot"></span> Interactive</span
+          >
+        </div>
+
+        <div class="circuit-scroll">
+          <svg
+            id="circuit"
+            viewBox="0 0 860 440"
+            role="img"
+            aria-label="Interactive half adder circuit with two inputs connected to XOR and AND gates"
+          >
+            <defs>
+              <filter id="glow" x="-100%" y="-100%" width="300%" height="300%">
+                <feGaussianBlur stdDeviation="3" result="blur" />
+                <feMerge>
+                  <feMergeNode in="blur" />
+                  <feMergeNode in="SourceGraphic" />
+                </feMerge>
+              </filter>
+            </defs>
+
+            <!-- Input switches -->
+            <g class="input-block" id="inputA">
+              <text x="35" y="93" class="svg-label">INPUT A</text>
+              <rect
+                x="35"
+                y="108"
+                width="102"
+                height="54"
+                rx="13"
+                class="input-box"
+              />
+              <text
+                id="aValue"
+                x="86"
+                y="142"
+                class="bit-text"
+                text-anchor="middle"
+              >
+                0
+              </text>
+              <text x="35" y="184" class="svg-muted">Click switch below</text>
+              <rect
+                id="aSwitch"
+                x="48"
+                y="198"
+                width="76"
+                height="30"
+                rx="15"
+                class="switch-track"
+                role="button"
+                tabindex="0"
+                aria-label="Toggle input A"
+                aria-pressed="false"
+              />
+              <circle id="aKnob" cx="64" cy="213" r="10" class="switch-knob" />
+            </g>
+            <g class="input-block" id="inputB">
+              <text x="35" y="283" class="svg-label">INPUT B</text>
+              <rect
+                x="35"
+                y="298"
+                width="102"
+                height="54"
+                rx="13"
+                class="input-box"
+              />
+              <text
+                id="bValue"
+                x="86"
+                y="332"
+                class="bit-text"
+                text-anchor="middle"
+              >
+                0
+              </text>
+              <text x="35" y="374" class="svg-muted">Click switch below</text>
+              <rect
+                id="bSwitch"
+                x="48"
+                y="388"
+                width="76"
+                height="30"
+                rx="15"
+                class="switch-track"
+                role="button"
+                tabindex="0"
+                aria-label="Toggle input B"
+                aria-pressed="false"
+              />
+              <circle id="bKnob" cx="64" cy="403" r="10" class="switch-knob" />
+            </g>
+
+            <!-- Input wires, split into branches -->
+            <path id="wireA1" class="wire" d="M137 135 H215 V124 H335" />
+            <path id="wireA2" class="wire" d="M215 135 V259 H335" />
+            <path id="wireB1" class="wire" d="M137 325 H248 V164 H335" />
+            <path id="wireB2" class="wire" d="M248 325 V299 H335" />
+
+            <!-- Junctions -->
+            <circle id="junctionA" cx="215" cy="135" r="4" class="junction" />
+            <circle id="junctionB" cx="248 " cy="325" r="4" class="junction" />
+
+            <!-- XOR gate -->
+            <g id="xorGate" class="gate">
+              <path
+                class="gate-outline"
+                d="M335 90 Q395 90 445 190 Q395 290 335 290 Q375 190 335 90 Z"
+              />
+              <path class="gate-extra" d="M319 90 Q359 190 319 290" />
+              <text x="386" y="194" class="gate-name" text-anchor="middle">
+                XOR
+              </text>
+              <text x="386" y="215" class="gate-sub" text-anchor="middle">
+                A ⊕ B
+              </text>
+            </g>
+
+            <!-- AND gate -->
+            <g id="andGate" class="gate">
+              <path
+                class="gate-outline"
+                d="M335 260 H385 A50 50 0 0 1 385 360 H335 Z"
+              />
+              <text x="377" y="314" class="gate-name" text-anchor="middle">
+                AND
+              </text>
+              <text x="377" y="334" class="gate-sub" text-anchor="middle">
+                A · B
+              </text>
+            </g>
+
+            <!-- Output wires -->
+            <path id="wireSum" class="wire" d="M445 190 H570 V130 H650" />
+            <path id="wireCarry" class="wire" d="M435 310 H570 V320 H650" />
+
+            <!-- Output indicators -->
+            <g id="sumOutput">
+              <text x="655" y="91" class="svg-label">SUM (S)</text>
+              <rect
+                x="650"
+                y="105"
+                width="164"
+                height="70"
+                rx="15"
+                class="output-box"
+              />
+              <circle id="sumLed" cx="681" cy="140" r="13" class="led" />
+              <text id="sumValue" x="730" y="149" class="output-bit">0</text>
+              <text x="655" y="198" class="svg-muted">XOR output</text>
+            </g>
+            <g id="carryOutput">
+              <text x="655" y="281" class="svg-label">CARRY (C)</text>
+              <rect
+                x="650"
+                y="295"
+                width="164"
+                height="70"
+                rx="15"
+                class="output-box"
+              />
+              <circle id="carryLed" cx="681" cy="330" r="13" class="led" />
+              <text id="carryValue" x="730" y="339" class="output-bit">0</text>
+              <text x="655" y="388" class="svg-muted">AND output</text>
+            </g>
+          </svg>
+        </div>
+
+        <div class="legend">
+          <span><i class="legend-line off"></i> Signal LOW (0)</span>
+          <span><i class="legend-line on"></i> Signal HIGH (1)</span>
+          <span><i class="legend-led"></i> Output LED is ON</span>
+        </div>
+      </section>
+
+      <section class="bottom-grid">
+        <article class="panel result-panel">
+          <p class="eyebrow">CURRENT RESULT</p>
+          <h3>Binary addition</h3>
+          <div class="equation">
+            <span id="equationA">0</span>
+            <span class="operator">+</span>
+            <span id="equationB">0</span>
+            <span class="equals">=</span>
+            <span class="result-bits"
+              ><span id="equationCarry">0</span
+              ><span id="equationSum">0</span></span
+            >
+          </div>
+          <p id="resultExplanation" class="result-explanation">
+            Both inputs are LOW, so both outputs are LOW.
+          </p>
+          <div class="formula-list">
+            <div>
+              <span>Sum</span><code>S = A XOR B</code><b id="sumFormula">0</b>
+            </div>
+            <div>
+              <span>Carry</span><code>C = A AND B</code
+              ><b id="carryFormula">0</b>
+            </div>
+          </div>
+        </article>
+
+        <article class="panel truth-panel">
+          <div class="truth-heading">
+            <div>
+              <p class="eyebrow">REFERENCE</p>
+              <h3>Truth table</h3>
+            </div>
+            <span class="tiny-pill">4 combinations</span>
+          </div>
+          <table>
+            <thead>
+              <tr>
+                <th>A</th>
+                <th>B</th>
+                <th>Sum</th>
+                <th>Carry</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr data-a="0" data-b="0">
+                <td>0</td>
+                <td>0</td>
+                <td>0</td>
+                <td>0</td>
+              </tr>
+              <tr data-a="0" data-b="1">
+                <td>0</td>
+                <td>1</td>
+                <td>1</td>
+                <td>0</td>
+              </tr>
+              <tr data-a="1" data-b="0">
+                <td>1</td>
+                <td>0</td>
+                <td>1</td>
+                <td>0</td>
+              </tr>
+              <tr data-a="1" data-b="1">
+                <td>1</td>
+                <td>1</td>
+                <td>0</td>
+                <td>1</td>
+              </tr>
+            </tbody>
+          </table>
+          <p class="table-note">
+            The highlighted row matches your current inputs.
+          </p>
+        </article>
+      </section>
+
+      <footer>
+        <span>BUILT FROM LOGIC, NOT LOOKUP TABLES</span>
+        <span>HALF ADDER · 2 INPUTS · 2 OUTPUTS</span>
+      </footer>
+    </main>
+    <script src="script.js"></script>
+  </body>
+</html>
