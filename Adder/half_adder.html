@@ -41,6 +41,7 @@
       <svg
         class="logic-diagram"
         viewBox="0 0 800 500"
+        width="800px"
         xmlns="http://www.w3.org/2000/svg"
       >
         <style>
@@ -59,13 +60,17 @@
             stroke-linejoin: round;
           }
 
+          .wire .active {
+            stroke: #e4572e;
+          }
+
           .node {
             fill: #ccc;
             stroke: #fff;
             stroke-width: 2;
           }
 
-          .node.active {
+          .node circle.active {
             fill: #e4572e;
           }
 
@@ -141,77 +146,139 @@
         <!-- Connection wires -->
         <g class="wire">
           <!-- Input A to XOR and AND -->
-          <g id="input_wire_a">
+          <g id="input-wire-a">
             <path d="M52 146 H202 V126 H362" />
             <path d="M202 146 V338 H356" />
           </g>
 
           <!-- Input B to XOR and AND -->
-          <g id="input_wire_b">
+          <g id="input-wire-b">
             <path d="M52 356 H140 V164 H362" />
             <path d="M140 356 V374 H356" />
           </g>
 
           <!-- XOR output to SUM -->
-          <path id="output_wire_xor" d="M433 145 H750" />
+          <path id="output-wire-sum" d="M433 145 H750" />
 
           <!-- AND output to CARRY -->
-          <path id="output_wire_carry" d="M437 355 H750" />
+          <path id="output-wire-carry" d="M437 355 H750" />
         </g>
 
         <!-- Connection points -->
         <g class="node">
-          <circle cx="41" cy="146" r="9.5" />
-          <circle cx="41" cy="356" r="9.5" />
-          <circle cx="759" cy="146" r="9.5" />
-          <circle cx="759" cy="356" r="9.5" />
+          <circle id="input-node-a" cx="41" cy="146" r="9.5" />
+          <circle id="input-node-b" cx="41" cy="356" r="9.5" />
+          <circle id="output-node-sum" cx="759" cy="146" r="9.5" />
+          <circle id="output-node-carry" cx="759" cy="356" r="9.5" />
         </g>
 
         <!-- XOR gate -->
         <g class="xor-gate">
+          {/* Main XOR gate body */}
           <path
             d="
-        M350 107
-        C390 107 420 126 433.254 145.54
-        C420 165 390 184 350 184
-        C359 175 365 161 365 145.54
-        C365 130 359 116 350 107
-        Z
-      "
+              M350 107
+              C390 107 420 126 433.254 145.54
+              C420 165 390 184 350 184
+              C359 175 365 161 365 145.54
+              C365 130 359 116 350 107
+              Z
+            "
           />
 
+          {/* White stroke around the complete outer boundary */}
           <path
             d="
-        M350.168 183.973
-        C399.779 185.1 426.157 159.072 433.254 145.542
-        H366.137
-        C365.574 145.542 365.123 146.008 365.129 146.571
-        C365.206 153.64 364.044 159.611 362.206 164.573
-        C359.045 173.103 353.887 178.653 349.588 181.683
-        C348.723 182.293 349.11 183.949 350.168 183.973Z
-      "
+              M350 107
+              C390 107 420 126 433.254 145.54
+              C420 165 390 184 350 184
+              C359 175 365 161 365 145.54
+              C365 130 359 116 350 107
+              Z
+            "
+            stroke="white"
+            stroke-width="3"
+            stroke-linejoin="round"
+            fill="none"
           />
 
+          {/* XOR curve */}
           <path
             d="M336.051 114.027C355.696 114.027 363.882 170.917 336.051 177.875"
-            stroke="#9A48D0"
+            stroke="#fff"
             stroke-width="4"
             stroke-linecap="round"
             fill="none"
           />
 
+          {/* XOR label */}
           <text class="gate-symbol" x="395" y="147">XOR</text>
         </g>
 
         <!-- AND gate -->
         <g class="and-gate">
-          <circle cx="400.738" cy="355.196" r="36.946" />
+          <path
+            d="M 356.404 318.25
+          H 400.738
+          A 36.946 36.946 0 0 1 437.684 355.196
+          A 36.946 36.946 0 0 1 400.738 392.142
+          H 356.404 Z"
+            stroke="white"
+            stroke-width="3"
+          />
 
-          <rect x="356.404" y="318.25" width="44.335" height="73.892" />
-
+          {/* AND label */}
           <text class="gate-symbol" x="400" y="357">AND &nbsp;</text>
         </g>
       </svg>
     </main>
+
+    <!-- javascript -->
+    <script>
+      input_node_a = document.getElementById("input-node-a");
+      input_node_b = document.getElementById("input-node-b");
+
+      input_wire_a = document.getElementById("input-wire-a");
+      input_wire_b = document.getElementById("input-wire-b");
+
+      input_a = 0;
+      input_b = 0;
+
+      input_node_a.addEventListener("click", () => {
+        input_a = !input_a;
+        input_node_a.classList.toggle("active");
+        input_wire_a.classList.toggle("active");
+
+        update_circuit();
+      });
+
+      input_node_b.addEventListener("click", () => {
+        input_b = !input_b;
+        input_node_b.classList.toggle("active");
+        input_wire_b.classList.toggle("active");
+
+        update_circuit();
+      });
+
+      output_node_sum = document.getElementById("output-node-sum");
+      output_node_carry = document.getElementById("output-node-carry");
+
+      output_wire_sum = document.getElementById("output-wire-sum");
+      output_wire_carry = document.getElementById("output-wire-carry");
+
+      function update_circuit() {
+        // XOR Gate: SUM = A ^ B
+        const sum = input_a ^ input_b;
+
+        output_node_sum.classList.toggle("active", Boolean(sum));
+        output_wire_sum.classList.toggle("active", Boolean(sum));
+
+        // AND Gate: CARRY = A & B
+        const carry = input_a & input_b;
+
+        output_node_carry.classList.toggle("active", Boolean(carry));
+        output_wire_carry.classList.toggle("active", Boolean(carry));
+      }
+    </script>
   </body>
 </html>
