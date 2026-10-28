@@ -32,151 +32,185 @@
         align-items: center;
         height: 100vh;
       }
-
-      svg {
-        padding: 4px;
-        border: 1px solid white;
-      }
     </style>
   </head>
   <body>
     <main>
       <h1>Half Adder</h1>
 
-      <svg width="800" height="400" viewbox="0 0 400 200">
-        <!-- inputs -->
-        <g>
-          <circle
-            cx="8"
-            cy="67"
-            r="6"
-            fill="red"
-            stroke="black"
-            stroke-width="2"
-          />
-          <text x="4" y="84" font-size="11" fill="white">Input A</text>
-        </g>
-        <g>
-          <circle
-            cx="8"
-            cy="127"
-            r="6"
-            fill="white"
-            stroke="black"
-            stroke-width="2"
-          />
-          <text x="4" y="143" font-size="11" fill="white">Input B</text>
+      <svg
+        class="logic-diagram"
+        viewBox="0 0 800 500"
+        xmlns="http://www.w3.org/2000/svg"
+      >
+        <style>
+          .board {
+            fill: #222;
+            stroke: white;
+            stroke-width: 2;
+            font-family: "Asap Sharp", sans-serif;
+          }
+
+          .wire {
+            fill: none;
+            stroke: white;
+            stroke-width: 3;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+          }
+
+          .node {
+            fill: #ccc;
+            stroke: #fff;
+            stroke-width: 2;
+          }
+
+          .node.active {
+            fill: #e4572e;
+          }
+
+          .label-bg {
+            fill: #333;
+          }
+
+          .label-text {
+            fill: white;
+            font-family: Arial, sans-serif;
+            font-weight: 600;
+            font-size: 12px;
+
+            text-anchor: middle;
+            dominant-baseline: middle;
+          }
+
+          .xor-gate {
+            fill: #9a48d0;
+          }
+
+          .and-gate {
+            fill: #d90368;
+          }
+
+          .gate-symbol {
+            fill: #fff;
+            font-size: 20px;
+            font-weight: bolder;
+            text-anchor: middle;
+            dominant-baseline: middle;
+          }
+        </style>
+
+        <!-- Diagram background -->
+        <rect class="board" x="1" y="1" width="798" height="498" />
+
+        <!-- Vertical borders -->
+        <path d="M41 2V498 M759 2V498" stroke="white" fill="none" />
+
+        <!-- Left labels -->
+        <g class="label">
+          <rect class="label-bg" x="11" y="160" width="60" height="20" rx="2" />
+          <text class="label-text" x="41" y="170">INPUT A</text>
+
+          <rect class="label-bg" x="11" y="370" width="60" height="20" rx="2" />
+          <text class="label-text" x="41" y="380">INPUT B</text>
         </g>
 
-        <!-- outputs -->
-        <g>
-          <circle
-            cx="393"
-            cy="67"
-            r="6"
-            fill="red"
-            stroke="black"
-            stroke-width="2"
-          />
-          <text x="375" y="84" font-size="11" fill="white">Sum</text>
-        </g>
-        <g>
-          <circle
-            cx="393"
-            cy="127"
-            r="6"
-            fill="white"
-            stroke="black"
-            stroke-width="2"
-          />
-          <text x="370" y="143" font-size="11" fill="white">Carry</text>
-        </g>
-
-        <!-- gates -->
-        <g>
+        <!-- Right labels -->
+        <g class="label">
           <rect
-            x="160"
-            y="50"
-            width="80"
-            height="40"
-            fill="lightpink"
-            stroke="black"
-            stroke-width="2"
+            class="label-bg"
+            x="729"
+            y="160"
+            width="60"
+            height="20"
+            rx="2"
           />
-          <text x="180" y="77" font-size="20" fill="black" font-weight="bold">
-            XOR
-          </text>
-        </g>
-        <g>
+          <text class="label-text" x="759" y="170">SUM</text>
+
           <rect
-            x="160"
-            y="120"
-            width="80"
-            height="40"
-            fill="lightblue"
-            stroke="black"
-            stroke-width="2"
+            class="label-bg"
+            x="729"
+            y="370"
+            width="60"
+            height="20"
+            rx="2"
           />
-          <text x="180" y="147" font-size="20" fill="black" font-weight="bold">
-            AND
-          </text>
+          <text class="label-text" x="759" y="380">CARRY</text>
         </g>
 
-        <!-- input wires -->
-        <g>
-          <polyline
-            points="12,67 159,67"
-            fill="none"
-            stroke="red"
-            stroke-width="2"
-            stroke-linecap="round"
-            stroke-linejoin="round"
-          />
-          <polyline
-            points="80,67 80,150 159, 150"
-            fill="none"
-            stroke="red"
-            stroke-width="2"
-            stroke-linecap="round"
-            stroke-linejoin="round"
-          />
-        </g>
-        <g>
-          <polyline
-            points="12,127 159,127"
-            fill="none"
-            stroke="white"
-            stroke-width="2"
-            stroke-linecap="round"
-            stroke-linejoin="round"
-          />
-          <polyline
-            points="100,127 100,82 159,82"
-            fill="none"
-            stroke="white"
-            stroke-width="2"
-            stroke-linecap="round"
-            stroke-linejoin="round"
-          />
+        <!-- Connection wires -->
+        <g class="wire">
+          <!-- Input A to XOR and AND -->
+          <g id="input_wire_a">
+            <path d="M52 146 H202 V126 H362" />
+            <path d="M202 146 V338 H356" />
+          </g>
+
+          <!-- Input B to XOR and AND -->
+          <g id="input_wire_b">
+            <path d="M52 356 H140 V164 H362" />
+            <path d="M140 356 V374 H356" />
+          </g>
+
+          <!-- XOR output to SUM -->
+          <path id="output_wire_xor" d="M433 145 H750" />
+
+          <!-- AND output to CARRY -->
+          <path id="output_wire_carry" d="M437 355 H750" />
         </g>
 
-        <!-- output wires -->
-        <polyline
-          points="241,67 389,67"
-          fill="none"
-          stroke="red"
-          stroke-width="2"
-          stroke-linecap="round"
-          stroke-linejoin="round"
-        />
-        <polyline
-          points="241,127 389,127"
-          fill="none"
-          stroke="white"
-          stroke-width="2"
-          stroke-linecap="round"
-          stroke-linejoin="round"
-        />
+        <!-- Connection points -->
+        <g class="node">
+          <circle cx="41" cy="146" r="9.5" />
+          <circle cx="41" cy="356" r="9.5" />
+          <circle cx="759" cy="146" r="9.5" />
+          <circle cx="759" cy="356" r="9.5" />
+        </g>
+
+        <!-- XOR gate -->
+        <g class="xor-gate">
+          <path
+            d="
+        M350 107
+        C390 107 420 126 433.254 145.54
+        C420 165 390 184 350 184
+        C359 175 365 161 365 145.54
+        C365 130 359 116 350 107
+        Z
+      "
+          />
+
+          <path
+            d="
+        M350.168 183.973
+        C399.779 185.1 426.157 159.072 433.254 145.542
+        H366.137
+        C365.574 145.542 365.123 146.008 365.129 146.571
+        C365.206 153.64 364.044 159.611 362.206 164.573
+        C359.045 173.103 353.887 178.653 349.588 181.683
+        C348.723 182.293 349.11 183.949 350.168 183.973Z
+      "
+          />
+
+          <path
+            d="M336.051 114.027C355.696 114.027 363.882 170.917 336.051 177.875"
+            stroke="#9A48D0"
+            stroke-width="4"
+            stroke-linecap="round"
+            fill="none"
+          />
+
+          <text class="gate-symbol" x="395" y="147">XOR</text>
+        </g>
+
+        <!-- AND gate -->
+        <g class="and-gate">
+          <circle cx="400.738" cy="355.196" r="36.946" />
+
+          <rect x="356.404" y="318.25" width="44.335" height="73.892" />
+
+          <text class="gate-symbol" x="400" y="357">AND &nbsp;</text>
+        </g>
       </svg>
     </main>
   </body>
