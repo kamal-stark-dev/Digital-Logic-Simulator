@@ -1,0 +1,1355 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Digital Logic Simulator</title>
+
+    <style>
+      @import url("https://fonts.googleapis.com/css2?family=Asap+Sharp:wght@400;500;600;700&display=swap");
+
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      :root {
+        --bg: #222;
+        --panel: #292929;
+        --wire: #666;
+        --active: #e4572e;
+        --text: #fff;
+        --muted: #aaa;
+        --xor: #9a48d0;
+        --and: #d90368;
+        --other: #3273a8;
+      }
+
+      body {
+        min-height: 100vh;
+        background: var(--bg);
+        color: var(--text);
+        font-family: "Asap Sharp", sans-serif;
+      }
+
+      header {
+        padding: 22px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        flex-wrap: wrap;
+        gap: 16px;
+        border-bottom: 1px solid #444;
+      }
+
+      .brand {
+        font-size: 20px;
+        font-weight: 700;
+      }
+
+      .brand span {
+        color: var(--active);
+      }
+
+      .subtitle {
+        color: var(--muted);
+        font-size: 14px;
+        margin-top: 4px;
+      }
+
+      .toolbar {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        flex-wrap: wrap;
+      }
+
+      select,
+      button {
+        border: 1px solid #555;
+        border-radius: 8px;
+        padding: 6px 10px;
+        background: var(--panel);
+        color: var(--text);
+        font: inherit;
+        cursor: pointer;
+      }
+
+      button:hover,
+      select:hover {
+        border-color: var(--active);
+      }
+
+      button:focus,
+      select:focus {
+        outline: none;
+      }
+
+      main {
+        max-width: 1250px;
+        margin: auto;
+        padding: 26px 20px 40px;
+      }
+
+      h1 {
+        font-size: clamp(25px, 4vw, 32px);
+        margin-bottom: 8px;
+      }
+
+      .circuit-board {
+        background: var(--panel);
+        border: 1px solid #444;
+        border-radius: 14px;
+        overflow: hidden;
+      }
+
+      .canvas-toolbar {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 12px;
+        padding: 13px 16px;
+        border-bottom: 1px solid #444;
+        color: var(--muted);
+        font-size: 12px;
+        flex-wrap: wrap;
+      }
+
+      .legend {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+        flex-wrap: wrap;
+      }
+
+      .legend span {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+      }
+
+      .legend i {
+        width: 18px;
+        height: 3px;
+        display: inline-block;
+        background: var(--wire);
+        border-radius: 3px;
+      }
+
+      .legend i.on {
+        background: var(--active);
+      }
+
+      .svg-scroll {
+        width: 100%;
+        overflow-x: auto;
+      }
+
+      svg {
+        display: block;
+        width: 100%;
+        min-width: 680px;
+        height: auto;
+        background: #242424;
+      }
+
+      .wire {
+        fill: none;
+        stroke: var(--wire);
+        stroke-width: 3;
+        stroke-linecap: round;
+        stroke-linejoin: round;
+        transition: stroke 0.15s;
+      }
+
+      .wire.active {
+        stroke: var(--active);
+      }
+
+      .junction {
+        fill: var(--wire);
+      }
+
+      .junction.active {
+        fill: var(--active);
+      }
+
+      .gate-body {
+        stroke: white;
+        stroke-width: 2;
+        fill: var(--other);
+      }
+
+      .gate-body.xor {
+        fill: var(--xor);
+      }
+
+      .gate-body.and {
+        fill: var(--and);
+      }
+
+      .gate-label {
+        fill: white;
+        font-weight: 700;
+        font-size: 13px;
+        text-anchor: middle;
+        dominant-baseline: middle;
+      }
+
+      .pin-label {
+        fill: #ddd;
+        font-size: 12px;
+      }
+
+      .io-label {
+        fill: white;
+        font-size: 13px;
+        font-weight: 600;
+        text-anchor: middle;
+      }
+
+      .node {
+        fill: #555;
+        stroke: white;
+        stroke-width: 2;
+        cursor: pointer;
+        transition: fill 0.15s;
+      }
+
+      .node.active {
+        fill: var(--active);
+      }
+
+      .input-node:hover {
+        stroke: #ffad91;
+        stroke-width: 3;
+      }
+
+      .output-node {
+        stroke-width: 2;
+      }
+
+      .output-value {
+        fill: white;
+        font-weight: 700;
+        font-size: 12px;
+        text-anchor: middle;
+        dominant-baseline: middle;
+        pointer-events: none;
+      }
+
+      .bottom-grid {
+        display: grid;
+        grid-template-columns: 1fr 1.3fr;
+        gap: 16px;
+        margin-top: 18px;
+      }
+
+      .panel {
+        background: var(--panel);
+        border: 1px solid #444;
+        border-radius: 12px;
+        padding: 18px;
+        min-width: 0;
+      }
+
+      .panel h2 {
+        font-size: 16px;
+        margin-bottom: 15px;
+      }
+
+      .input-controls {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 12px;
+      }
+
+      .input-control {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 14px;
+        flex: 1;
+        min-width: 110px;
+        border: 1px solid #444;
+        border-radius: 9px;
+        padding: 12px;
+      }
+
+      .input-control label {
+        font-weight: 600;
+        font-size: 14px;
+      }
+
+      .toggle {
+        min-width: 48px;
+        font-weight: 700;
+        padding: 7px 12px;
+        background: #383838;
+      }
+
+      .toggle.on {
+        background: var(--active);
+        border-color: var(--active);
+      }
+
+      .output-grid {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 12px;
+      }
+
+      .output-control {
+        flex: 1;
+        min-width: 105px;
+        border: 1px solid #444;
+        border-radius: 9px;
+        padding: 12px;
+      }
+
+      .output-control .name {
+        color: var(--muted);
+        font-size: 12px;
+        margin-bottom: 8px;
+      }
+
+      .output-control .value {
+        font-size: 28px;
+        font-weight: 700;
+      }
+
+      .output-control .value.on {
+        color: var(--active);
+      }
+
+      .truth-section {
+        margin-top: 18px;
+      }
+
+      .truth-table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 13px;
+      }
+
+      .truth-table th,
+      .truth-table td {
+        text-align: center;
+        padding: 9px 8px;
+        border-bottom: 1px solid #414141;
+      }
+
+      .truth-table th {
+        color: #bbb;
+        font-weight: 600;
+      }
+
+      .truth-table tr.current {
+        background: #493027;
+        font-weight: 700;
+      }
+
+      .truth-table tr:last-child td {
+        border-bottom: none;
+      }
+
+      .formula {
+        color: #ddd;
+        font-size: 13px;
+        line-height: 1.8;
+        margin-top: 14px;
+      }
+
+      .formula code {
+        color: #ffab8f;
+        font-family: monospace;
+      }
+
+      footer {
+        text-align: center;
+        color: #777;
+        font-size: 12px;
+        padding: 25px 10px;
+      }
+
+      @media (max-width: 700px) {
+        .bottom-grid {
+          grid-template-columns: 1fr;
+        }
+
+        header {
+          padding: 18px;
+        }
+
+        main {
+          padding: 22px 12px;
+        }
+
+        .input-control {
+          min-width: 95px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <header>
+      <div>
+        <div class="brand">Digital Logic <span>Simulator</span></div>
+        <div class="subtitle">Learn how computers work.</div>
+      </div>
+
+      <div class="toolbar">
+        <select id="circuit-select" aria-label="Select circuit">
+          <option value="halfAdder">Half Adder</option>
+          <option value="fullAdder">Full Adder</option>
+        </select>
+
+        <button id="reset-button">Reset inputs</button>
+      </div>
+    </header>
+
+    <main>
+      <section class="heading">
+        <h1 id="circuit-title">Half Adder</h1>
+      </section>
+
+      <section class="circuit-board">
+        <div class="canvas-toolbar">
+          <div class="legend">
+            <span><i></i> LOW (0)</span>
+            <span><i class="on"></i> HIGH (1)</span>
+          </div>
+        </div>
+
+        <div class="svg-scroll">
+          <svg
+            id="circuit-svg"
+            viewBox="0 0 900 510"
+            role="img"
+            aria-label="Interactive logic circuit"
+          ></svg>
+        </div>
+      </section>
+
+      <section class="bottom-grid">
+        <div class="panel">
+          <h2>Input switches</h2>
+          <div id="input-controls" class="input-controls"></div>
+        </div>
+
+        <div class="panel">
+          <h2>Output signals</h2>
+          <div id="output-controls" class="output-grid"></div>
+          <div id="formula" class="formula"></div>
+        </div>
+      </section>
+
+      <section class="panel truth-section">
+        <h2>Truth table</h2>
+        <div id="truth-table-container"></div>
+      </section>
+    </main>
+
+    <footer>
+      Digital Logic Simulator · Built with SVGs, Javascript and Logic Gates.
+    </footer>
+
+    <script>
+      "use strict";
+
+      // ==========================================================
+      // 1. GATE LIBRARY
+      // Each gate's behavior is defined once and reused everywhere.
+      // ==========================================================
+
+      const gateTypes = {
+        AND: {
+          inputs: ["A", "B"],
+          outputs: ["Y"],
+          evaluate: ([a, b]) => a & b,
+          color: "and",
+        },
+
+        OR: {
+          inputs: ["A", "B"],
+          outputs: ["Y"],
+          evaluate: ([a, b]) => a | b,
+          color: "other",
+        },
+
+        XOR: {
+          inputs: ["A", "B"],
+          outputs: ["Y"],
+          evaluate: ([a, b]) => a ^ b,
+          color: "xor",
+        },
+
+        NAND: {
+          inputs: ["A", "B"],
+          outputs: ["Y"],
+          evaluate: ([a, b]) => 1 - (a & b),
+          color: "other",
+        },
+
+        NOR: {
+          inputs: ["A", "B"],
+          outputs: ["Y"],
+          evaluate: ([a, b]) => 1 - (a | b),
+          color: "other",
+        },
+
+        XNOR: {
+          inputs: ["A", "B"],
+          outputs: ["Y"],
+          evaluate: ([a, b]) => 1 - (a ^ b),
+          color: "other",
+        },
+
+        NOT: {
+          inputs: ["A"],
+          outputs: ["Y"],
+          evaluate: ([a]) => 1 - a,
+          color: "other",
+        },
+
+        BUFFER: {
+          inputs: ["A"],
+          outputs: ["Y"],
+          evaluate: ([a]) => a,
+          color: "other",
+        },
+      };
+
+      // ==========================================================
+      // 2. CIRCUIT DEFINITIONS
+      //
+      // Circuits are data. They don't contain custom simulation code.
+      //
+      // Component types:
+      //   input  = interactive source
+      //   gate   = reusable logic gate
+      //   output = output indicator
+      //
+      // Connections use:
+      //   { from: "component.outputPin",
+      //     to:   "component.inputPin" }
+      //
+      // Layout coordinates are independent of gate behavior.
+      // ==========================================================
+
+      const circuits = {
+        halfAdder: {
+          title: "Half Adder",
+          description: "Adds two binary bits using XOR and AND gates.",
+
+          inputs: [
+            { id: "A", label: "INPUT A", x: 80, y: 155 },
+            { id: "B", label: "INPUT B", x: 80, y: 355 },
+          ],
+
+          gates: [
+            { id: "xor1", type: "XOR", x: 365, y: 120 },
+            { id: "and1", type: "AND", x: 365, y: 320 },
+          ],
+
+          outputs: [
+            { id: "SUM", label: "SUM", x: 820, y: 155 },
+            { id: "CARRY", label: "CARRY", x: 820, y: 355 },
+          ],
+
+          connections: [
+            { from: "A", to: "xor1.A" },
+            { from: "B", to: "xor1.B" },
+
+            { from: "A", to: "and1.A" },
+            { from: "B", to: "and1.B" },
+
+            { from: "xor1.Y", to: "SUM" },
+            { from: "and1.Y", to: "CARRY" },
+          ],
+
+          formula: ["SUM = A XOR B", "CARRY = A AND B"],
+        },
+
+        fullAdder: {
+          title: "Full Adder",
+          description: "Adds A, B and carry-in using two half-adder stages.",
+
+          inputs: [
+            { id: "A", label: "INPUT A", x: 65, y: 115 },
+            { id: "B", label: "INPUT B", x: 65, y: 260 },
+            { id: "Cin", label: "CARRY IN", x: 65, y: 425 },
+          ],
+
+          gates: [
+            { id: "xor1", type: "XOR", x: 260, y: 145 },
+            { id: "xor2", type: "XOR", x: 480, y: 145 },
+
+            { id: "and1", type: "AND", x: 260, y: 305 },
+            { id: "and2", type: "AND", x: 480, y: 345 },
+
+            { id: "or1", type: "OR", x: 680, y: 325 },
+          ],
+
+          outputs: [
+            { id: "SUM", label: "SUM", x: 820, y: 175 },
+            { id: "Cout", label: "CARRY OUT", x: 820, y: 380 },
+          ],
+
+          connections: [
+            // First half-adder
+            { from: "A", to: "xor1.A" },
+            { from: "B", to: "xor1.B" },
+
+            // Second half-adder
+            { from: "xor1.Y", to: "xor2.A" },
+            { from: "Cin", to: "xor2.B" },
+
+            // First carry
+            { from: "A", to: "and1.A" },
+            { from: "B", to: "and1.B" },
+
+            // Second carry
+            { from: "xor1.Y", to: "and2.A" },
+            { from: "Cin", to: "and2.B" },
+
+            // Combine carries
+            { from: "and1.Y", to: "or1.A" },
+            { from: "and2.Y", to: "or1.B" },
+
+            // Circuit outputs
+            { from: "xor2.Y", to: "SUM" },
+            { from: "or1.Y", to: "Cout" },
+          ],
+
+          formula: [
+            "SUM = A XOR B XOR Cin",
+            "Cout = (A AND B) OR ((A XOR B) AND Cin)",
+          ],
+        },
+      };
+
+      // ==========================================================
+      // 3. SIMULATOR
+      //
+      // This code doesn't know whether it is simulating a half-adder
+      // or a full-adder. It evaluates the graph of connected gates.
+      // ==========================================================
+
+      const state = {
+        circuitName: "halfAdder",
+        inputs: {},
+        signals: {},
+      };
+
+      function parsePin(reference) {
+        const dot = reference.indexOf(".");
+
+        if (dot === -1) {
+          return {
+            component: reference,
+            pin: null,
+          };
+        }
+
+        return {
+          component: reference.slice(0, dot),
+          pin: reference.slice(dot + 1),
+        };
+      }
+
+      function getComponentMap(circuit) {
+        return new Map([
+          ...circuit.inputs.map((c) => [c.id, { ...c, kind: "input" }]),
+          ...circuit.gates.map((c) => [c.id, { ...c, kind: "gate" }]),
+          ...circuit.outputs.map((c) => [c.id, { ...c, kind: "output" }]),
+        ]);
+      }
+
+      function validateCircuit(circuit) {
+        const components = getComponentMap(circuit);
+        const incoming = new Map();
+
+        for (const connection of circuit.connections) {
+          const source = parsePin(connection.from);
+          const target = parsePin(connection.to);
+
+          if (!components.has(source.component)) {
+            throw new Error(`Unknown source: ${connection.from}`);
+          }
+
+          if (!components.has(target.component)) {
+            throw new Error(`Unknown target: ${connection.to}`);
+          }
+
+          const sourceComponent = components.get(source.component);
+          const targetComponent = components.get(target.component);
+
+          if (sourceComponent.kind === "output") {
+            throw new Error("An output cannot drive a wire.");
+          }
+
+          if (sourceComponent.kind === "gate") {
+            const definition = gateTypes[sourceComponent.type];
+
+            if (!definition.outputs.includes(source.pin)) {
+              throw new Error(`Invalid output pin: ${connection.from}`);
+            }
+          } else if (source.pin !== null) {
+            throw new Error(`Invalid input source: ${connection.from}`);
+          }
+
+          if (targetComponent.kind === "input") {
+            throw new Error("A connection cannot drive a primary input.");
+          }
+
+          if (targetComponent.kind === "gate") {
+            const definition = gateTypes[targetComponent.type];
+
+            if (!definition.inputs.includes(target.pin)) {
+              throw new Error(`Invalid input pin: ${connection.to}`);
+            }
+          } else if (target.pin !== null) {
+            throw new Error(`Invalid output target: ${connection.to}`);
+          }
+
+          if (incoming.has(connection.to)) {
+            throw new Error(`Multiple connections drive ${connection.to}`);
+          }
+
+          incoming.set(connection.to, connection.from);
+        }
+
+        // Every gate input must have exactly one connection.
+        for (const gate of circuit.gates) {
+          for (const pin of gateTypes[gate.type].inputs) {
+            if (!incoming.has(`${gate.id}.${pin}`)) {
+              throw new Error(`Unconnected gate input: ${gate.id}.${pin}`);
+            }
+          }
+        }
+
+        // Every output must be driven.
+        for (const output of circuit.outputs) {
+          if (!incoming.has(output.id)) {
+            throw new Error(`Unconnected output: ${output.id}`);
+          }
+        }
+
+        // Topological sort detects feedback loops and determines
+        // a valid gate evaluation order.
+        const dependencies = new Map(
+          circuit.gates.map((gate) => [gate.id, new Set()]),
+        );
+
+        const downstream = new Map(circuit.gates.map((gate) => [gate.id, []]));
+
+        for (const connection of circuit.connections) {
+          const source = parsePin(connection.from);
+          const target = parsePin(connection.to);
+
+          if (
+            components.get(source.component).kind === "gate" &&
+            components.get(target.component).kind === "gate"
+          ) {
+            dependencies.get(target.component).add(source.component);
+            downstream.get(source.component).push(target.component);
+          }
+        }
+
+        const ready = [...dependencies]
+          .filter(([, deps]) => deps.size === 0)
+          .map(([id]) => id);
+
+        const order = [];
+
+        while (ready.length) {
+          const id = ready.shift();
+          order.push(id);
+
+          for (const next of downstream.get(id)) {
+            const deps = dependencies.get(next);
+            deps.delete(id);
+
+            if (deps.size === 0) {
+              ready.push(next);
+            }
+          }
+        }
+
+        if (order.length !== circuit.gates.length) {
+          throw new Error(
+            "This simulator version supports combinational circuits only. " +
+              "A feedback loop was detected.",
+          );
+        }
+
+        return { incoming, order };
+      }
+
+      function simulate(circuit) {
+        const { incoming, order } = validateCircuit(circuit);
+        const signals = {};
+
+        // Primary inputs supply their current values.
+        for (const input of circuit.inputs) {
+          signals[input.id] = Number(state.inputs[input.id] ?? 0);
+        }
+
+        // Evaluate gates in dependency order.
+        for (const gateId of order) {
+          const gate = circuit.gates.find((g) => g.id === gateId);
+          const definition = gateTypes[gate.type];
+
+          const inputValues = definition.inputs.map((pin) => {
+            const source = incoming.get(`${gate.id}.${pin}`);
+
+            if (source === undefined) {
+              throw new Error(`Missing connection to ${gate.id}.${pin}`);
+            }
+
+            return signals[source];
+          });
+
+          if (inputValues.some((value) => value === undefined)) {
+            throw new Error(`Cannot evaluate gate ${gate.id}`);
+          }
+
+          signals[`${gate.id}.Y`] = definition.evaluate(inputValues);
+        }
+
+        // Outputs read the signal that drives them.
+        for (const output of circuit.outputs) {
+          const source = incoming.get(output.id);
+          signals[output.id] = signals[source];
+        }
+
+        state.signals = signals;
+        return signals;
+      }
+
+      // ==========================================================
+      // 4. SVG RENDERER
+      //
+      // Gate placement is visual metadata. The simulator doesn't
+      // depend on these coordinates.
+      // ==========================================================
+
+      const SVG_NS = "http://www.w3.org/2000/svg";
+      const svg = document.getElementById("circuit-svg");
+
+      const GATE_WIDTH = 100;
+      const GATE_HEIGHT = 64;
+
+      function svgElement(name, attributes = {}, textContent = null) {
+        const el = document.createElementNS(SVG_NS, name);
+
+        for (const [key, value] of Object.entries(attributes)) {
+          el.setAttribute(key, value);
+        }
+
+        if (textContent !== null) {
+          el.textContent = textContent;
+        }
+
+        return el;
+      }
+
+      function appendText(parent, x, y, text, className, anchor) {
+        const attrs = {
+          x,
+          y,
+          class: className,
+        };
+
+        if (anchor) attrs["text-anchor"] = anchor;
+
+        const el = svgElement("text", attrs, text);
+        parent.appendChild(el);
+        return el;
+      }
+
+      function getPinPosition(circuit, reference) {
+        const { component, pin } = parsePin(reference);
+
+        const input = circuit.inputs.find((c) => c.id === component);
+
+        if (input) {
+          return { x: input.x, y: input.y };
+        }
+
+        const output = circuit.outputs.find((c) => c.id === component);
+
+        if (output) {
+          return { x: output.x, y: output.y };
+        }
+
+        const gate = circuit.gates.find((c) => c.id === component);
+
+        if (!gate) {
+          throw new Error(`Cannot locate ${reference}`);
+        }
+
+        const definition = gateTypes[gate.type];
+        const index = definition.inputs.indexOf(pin);
+
+        if (pin === "Y") {
+          return {
+            x: gate.x + GATE_WIDTH,
+            y: gate.y + GATE_HEIGHT / 2,
+          };
+        }
+
+        if (index === -1) {
+          throw new Error(`Unknown pin ${reference}`);
+        }
+
+        const count = definition.inputs.length;
+
+        return {
+          x: gate.x,
+          y: gate.y + GATE_HEIGHT * ((index + 1) / (count + 1)),
+        };
+      }
+
+      function makeWirePath(start, end) {
+        const midX = start.x + (end.x - start.x) * 0.5;
+
+        return [
+          `M ${start.x} ${start.y}`,
+          `H ${midX}`,
+          `V ${end.y}`,
+          `H ${end.x}`,
+        ].join(" ");
+      }
+
+      function drawInput(circuit, input) {
+        const group = svgElement("g", {
+          "data-component": input.id,
+        });
+
+        appendText(
+          group,
+          input.x,
+          input.y - 25,
+          input.label,
+          "io-label",
+          "middle",
+        );
+
+        const node = svgElement("circle", {
+          cx: input.x,
+          cy: input.y,
+          r: 10,
+          class: "node input-node",
+          tabindex: "0",
+          role: "button",
+          "aria-label": `Toggle input ${input.id}`,
+          "aria-pressed": String(Boolean(state.inputs[input.id])),
+          "data-input": input.id,
+        });
+
+        node.addEventListener("click", () => toggleInput(input.id));
+
+        node.addEventListener("keydown", (event) => {
+          if (event.key === "Enter" || event.key === " ") {
+            event.preventDefault();
+            toggleInput(input.id);
+          }
+        });
+
+        group.appendChild(node);
+        svg.appendChild(group);
+      }
+
+      function drawOutput(output) {
+        const group = svgElement("g", {
+          "data-component": output.id,
+        });
+
+        appendText(
+          group,
+          output.x,
+          output.y - 25,
+          output.label,
+          "io-label",
+          "middle",
+        );
+
+        group.appendChild(
+          svgElement("circle", {
+            cx: output.x,
+            cy: output.y,
+            r: 10,
+            class: "node output-node",
+            "data-output": output.id,
+          }),
+        );
+
+        group.appendChild(
+          svgElement(
+            "text",
+            {
+              x: output.x,
+              y: output.y + 1,
+              class: "output-value",
+              "data-output-value": output.id,
+            },
+            "0",
+          ),
+        );
+
+        svg.appendChild(group);
+      }
+
+      function drawGate(gate) {
+        const definition = gateTypes[gate.type];
+        const group = svgElement("g", {
+          "data-component": gate.id,
+        });
+
+        const bodyClass = `gate-body ${definition.color}`;
+
+        // Rounded gate body: visual representation only.
+        group.appendChild(
+          svgElement("rect", {
+            x: gate.x,
+            y: gate.y,
+            width: GATE_WIDTH,
+            height: GATE_HEIGHT,
+            rx: 10,
+            class: bodyClass,
+          }),
+        );
+
+        appendText(
+          group,
+          gate.x + GATE_WIDTH / 2,
+          gate.y + GATE_HEIGHT / 2,
+          gate.type,
+          "gate-label",
+        );
+
+        definition.inputs.forEach((pin) => {
+          const pos = getPinPosition(
+            {
+              ...circuits[state.circuitName],
+              gates: circuits[state.circuitName].gates,
+            },
+            `${gate.id}.${pin}`,
+          );
+
+          appendText(group, pos.x + 7, pos.y - 6, pin, "pin-label");
+        });
+
+        svg.appendChild(group);
+      }
+
+      function drawWires(circuit) {
+        const wireGroup = svgElement("g", { class: "wires" });
+
+        for (const connection of circuit.connections) {
+          const start = getPinPosition(circuit, connection.from);
+          const end = getPinPosition(circuit, connection.to);
+
+          const path = svgElement("path", {
+            d: makeWirePath(start, end),
+            class: "wire",
+            "data-from": connection.from,
+            "data-to": connection.to,
+          });
+
+          wireGroup.appendChild(path);
+        }
+
+        // Render wires first so they appear underneath the gates.
+        svg.appendChild(wireGroup);
+      }
+
+      function renderCircuit() {
+        const circuit = circuits[state.circuitName];
+
+        validateCircuit(circuit);
+
+        svg.replaceChildren();
+
+        const background = svgElement("rect", {
+          x: 0,
+          y: 0,
+          width: 900,
+          height: 510,
+          fill: "#242424",
+        });
+
+        svg.appendChild(background);
+
+        // Draw wires first, then gates and I/O nodes.
+        drawWires(circuit);
+
+        circuit.gates.forEach(drawGate);
+        circuit.inputs.forEach((input) => drawInput(circuit, input));
+        circuit.outputs.forEach(drawOutput);
+
+        document.getElementById("circuit-title").textContent = circuit.title;
+
+        document.getElementById("circuit-description").textContent =
+          circuit.description;
+
+        renderInputControls(circuit);
+        renderOutputControls(circuit);
+        renderFormula(circuit);
+
+        updateCircuit();
+      }
+
+      // ==========================================================
+      // 5. USER INTERFACE
+      // ==========================================================
+
+      function toggleInput(id) {
+        state.inputs[id] = state.inputs[id] ? 0 : 1;
+        updateCircuit();
+      }
+
+      function renderInputControls(circuit) {
+        const container = document.getElementById("input-controls");
+        container.replaceChildren();
+
+        for (const input of circuit.inputs) {
+          const row = document.createElement("div");
+          row.className = "input-control";
+
+          const label = document.createElement("label");
+          label.textContent = input.id;
+
+          const button = document.createElement("button");
+          button.className = "toggle";
+          button.dataset.input = input.id;
+          button.type = "button";
+          button.addEventListener("click", () => toggleInput(input.id));
+
+          row.append(label, button);
+          container.appendChild(row);
+        }
+      }
+
+      function renderOutputControls(circuit) {
+        const container = document.getElementById("output-controls");
+        container.replaceChildren();
+
+        for (const output of circuit.outputs) {
+          const card = document.createElement("div");
+          card.className = "output-control";
+
+          const name = document.createElement("div");
+          name.className = "name";
+          name.textContent = output.label;
+
+          const value = document.createElement("div");
+          value.className = "value";
+          value.dataset.outputValue = output.id;
+          value.textContent = "0";
+
+          card.append(name, value);
+          container.appendChild(card);
+        }
+      }
+
+      function renderFormula(circuit) {
+        const container = document.getElementById("formula");
+        container.replaceChildren();
+
+        for (const formula of circuit.formula) {
+          const line = document.createElement("div");
+          const code = document.createElement("code");
+          code.textContent = formula;
+          line.appendChild(code);
+          container.appendChild(line);
+        }
+      }
+
+      function updateCircuit() {
+        const circuit = circuits[state.circuitName];
+        const signals = simulate(circuit);
+
+        // Update SVG input nodes.
+        svg.querySelectorAll("[data-input]").forEach((node) => {
+          const id = node.dataset.input;
+          const value = state.inputs[id] ?? 0;
+
+          node.classList.toggle("active", Boolean(value));
+          node.setAttribute("aria-pressed", String(Boolean(value)));
+        });
+
+        // Update each connection based on its actual source signal.
+        svg.querySelectorAll(".wire").forEach((wire) => {
+          const value = signals[wire.dataset.from];
+
+          wire.classList.toggle("active", value === 1);
+        });
+
+        // Update SVG output indicators.
+        svg.querySelectorAll("[data-output]").forEach((node) => {
+          const id = node.dataset.output;
+          node.classList.toggle("active", signals[id] === 1);
+        });
+
+        svg.querySelectorAll("[data-output-value]").forEach((node) => {
+          const id = node.dataset.outputValue;
+          node.textContent = signals[id] ?? 0;
+        });
+
+        // Update input controls.
+        document.querySelectorAll(".toggle[data-input]").forEach((button) => {
+          const value = state.inputs[button.dataset.input] ?? 0;
+
+          button.textContent = value;
+          button.classList.toggle("on", Boolean(value));
+          button.setAttribute("aria-pressed", String(Boolean(value)));
+        });
+
+        // Update output cards.
+        document
+          .querySelectorAll(".output-control [data-output-value]")
+          .forEach((node) => {
+            const value = signals[node.dataset.outputValue] ?? 0;
+
+            node.textContent = value;
+            node.classList.toggle("on", value === 1);
+          });
+
+        renderTruthTable(circuit);
+      }
+
+      // ==========================================================
+      // 6. TRUTH TABLE
+      //
+      // The truth table is generated by running the same simulator
+      // for each possible combination of primary inputs.
+      // ==========================================================
+
+      function renderTruthTable(circuit) {
+        const container = document.getElementById("truth-table-container");
+
+        const table = document.createElement("table");
+        table.className = "truth-table";
+
+        const thead = document.createElement("thead");
+        const headerRow = document.createElement("tr");
+
+        for (const input of circuit.inputs) {
+          const th = document.createElement("th");
+          th.textContent = input.id;
+          headerRow.appendChild(th);
+        }
+
+        for (const output of circuit.outputs) {
+          const th = document.createElement("th");
+          th.textContent = output.id;
+          headerRow.appendChild(th);
+        }
+
+        thead.appendChild(headerRow);
+        table.appendChild(thead);
+
+        const tbody = document.createElement("tbody");
+
+        const currentInputs = { ...state.inputs };
+        const count = 1 << circuit.inputs.length;
+
+        for (let bits = 0; bits < count; bits++) {
+          const combination = {};
+
+          circuit.inputs.forEach((input, index) => {
+            const shift = circuit.inputs.length - index - 1;
+            combination[input.id] = (bits >> shift) & 1;
+          });
+
+          Object.assign(state.inputs, combination);
+
+          const signals = simulate(circuit);
+          const row = document.createElement("tr");
+
+          const isCurrent = circuit.inputs.every(
+            (input) => currentInputs[input.id] === combination[input.id],
+          );
+
+          if (isCurrent) row.className = "current";
+
+          for (const input of circuit.inputs) {
+            const cell = document.createElement("td");
+            cell.textContent = combination[input.id];
+            row.appendChild(cell);
+          }
+
+          for (const output of circuit.outputs) {
+            const cell = document.createElement("td");
+            cell.textContent = signals[output.id];
+            row.appendChild(cell);
+          }
+
+          tbody.appendChild(row);
+        }
+
+        // Restore the live simulation state after generating the table.
+        state.inputs = currentInputs;
+        simulate(circuit);
+
+        table.appendChild(tbody);
+        container.replaceChildren(table);
+      }
+
+      // ==========================================================
+      // 7. INITIALIZATION
+      // ==========================================================
+
+      function loadCircuit(name) {
+        state.circuitName = name;
+
+        const circuit = circuits[name];
+
+        state.inputs = Object.fromEntries(
+          circuit.inputs.map((input) => [input.id, 0]),
+        );
+
+        renderCircuit();
+      }
+
+      document
+        .getElementById("circuit-select")
+        .addEventListener("change", (event) => loadCircuit(event.target.value));
+
+      document.getElementById("reset-button").addEventListener("click", () => {
+        const circuit = circuits[state.circuitName];
+
+        for (const input of circuit.inputs) {
+          state.inputs[input.id] = 0;
+        }
+
+        updateCircuit();
+      });
+
+      // Verify every built-in gate definition.
+      for (const [type, definition] of Object.entries(gateTypes)) {
+        const inputCount = definition.inputs.length;
+        const combinations = 1 << inputCount;
+
+        for (let bits = 0; bits < combinations; bits++) {
+          const inputs = definition.inputs.map((_, index) => {
+            const shift = inputCount - index - 1;
+            return (bits >> shift) & 1;
+          });
+
+          const result = definition.evaluate(inputs);
+
+          if (result !== 0 && result !== 1) {
+            throw new Error(`${type} returned a non-binary output`);
+          }
+        }
+      }
+
+      loadCircuit("halfAdder");
+    </script>
+  </body>
+</html>
